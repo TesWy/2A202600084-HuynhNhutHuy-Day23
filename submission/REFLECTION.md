@@ -35,15 +35,16 @@ Evidence screenshots:
 - `submission/screenshots/cost-and-tokens.png`
 - `submission/screenshots/alertmanager-firing.png`
 - `submission/screenshots/alertmanager-resolved.png`
+- `submission/screenshots/discord-alerts.png`
 
 Alert drill:
 
 | When | What | Evidence |
 |---|---|---|
 | T0 | stopped `day23-app` | `alertmanager-firing.png` |
-| T0 + about 115s | `ServiceDown` fired | Alertmanager firing screenshot and Discord relay logs |
+| T0 + about 115s | `ServiceDown` fired | `discord-alerts.png` shows the `[FIRING]` Discord message |
 | T1 | restarted `day23-app` | app health returned |
-| T1 + about 25s | alert resolved | `alertmanager-resolved.png` and Discord relay logs |
+| T1 + about 25s | alert resolved | `discord-alerts.png` shows the `[RESOLVED]` Discord message |
 
 One thing that surprised me about Prometheus and Grafana was how easy it is to have a correct metric but an empty panel. The datasource UID and dashboard template value had to match exactly before the panels became useful. The dashboard was not useful until the queries, label filters, and datasource provisioning were treated as code.
 
