@@ -1,14 +1,14 @@
 # Day 23 Lab Reflection
 
-**Student:** Huynh Nhut Huy
-**Submission date:** 2026-05-11
+**Sinh viên:** Huynh Nhut Huy
+**Ngày nộp:** 2026-05-11
 **Lab repo URL:** https://github.com/TesWy/2A202600084-HuynhNhutHuy-Day23
 
 ---
 
 ## 1. Hardware + Setup Output
 
-`00-setup/setup-report.json` was generated and committed:
+File `00-setup/setup-report.json` đã được tạo và commit:
 
 ```json
 {
@@ -22,13 +22,13 @@
 }
 ```
 
-The Day23 stack ran locally with FastAPI, Prometheus, Grafana, Alertmanager, Loki, Jaeger, and the OpenTelemetry Collector. Discord was used through a local alert relay because Slack workspace creation was not available.
+Stack Day23 đã chạy local với FastAPI, Prometheus, Grafana, Alertmanager, Loki, Jaeger và OpenTelemetry Collector. Vì không tạo được Slack workspace riêng, em dùng Discord thông qua một local alert relay để nhận alert fire và resolve.
 
 ---
 
 ## 2. Track 02 - Dashboards & Alerts
 
-Evidence screenshots:
+Các ảnh evidence đã nộp:
 
 - `submission/screenshots/dashboard-overview.png`
 - `submission/screenshots/slo-burn-rate.png`
@@ -37,29 +37,29 @@ Evidence screenshots:
 - `submission/screenshots/alertmanager-resolved.png`
 - `submission/screenshots/discord-alerts.png`
 
-Alert drill:
+Quy trình thử alert:
 
-| When | What | Evidence |
+| Thời điểm | Hành động / trạng thái | Evidence |
 |---|---|---|
-| T0 | stopped `day23-app` | `alertmanager-firing.png` |
-| T0 + about 115s | `ServiceDown` fired | `discord-alerts.png` shows the `[FIRING]` Discord message |
-| T1 | restarted `day23-app` | app health returned |
-| T1 + about 25s | alert resolved | `discord-alerts.png` shows the `[RESOLVED]` Discord message |
+| T0 | Dừng container `day23-app` | `alertmanager-firing.png` |
+| T0 + khoảng 115s | Alert `ServiceDown` fire | `discord-alerts.png` có message `[FIRING]` trên Discord |
+| T1 | Khởi động lại `day23-app` | app health trở lại bình thường |
+| T1 + khoảng 25s | Alert resolved | `discord-alerts.png` có message `[RESOLVED]` trên Discord |
 
-One thing that surprised me about Prometheus and Grafana was how easy it is to have a correct metric but an empty panel. The datasource UID and dashboard template value had to match exactly before the panels became useful. The dashboard was not useful until the queries, label filters, and datasource provisioning were treated as code.
+Điều làm em bất ngờ nhất ở Prometheus và Grafana là metric đúng chưa chắc dashboard đã hữu ích. Datasource UID, template variable và label filter phải khớp chính xác thì panel mới có data. Từ đó em thấy dashboard cũng nên được xem như code: query, label, provisioning và screenshot evidence đều cần version control rõ ràng.
 
 ---
 
 ## 3. Track 03 - Tracing & Logs
 
-Evidence screenshots:
+Các ảnh evidence đã nộp:
 
 - `submission/screenshots/jaeger-trace.png`
 - `submission/screenshots/jaeger-attrs.png`
 
-The trace screenshot shows one `POST /predict` request with the application spans `predict`, `embed-text`, `vector-search`, and `generate-tokens`. The `generate-tokens` span includes GenAI semantic attributes such as input tokens, output tokens, and finish reason.
+Ảnh Jaeger trace cho thấy một request `POST /predict` với các span ứng dụng gồm `predict`, `embed-text`, `vector-search` và `generate-tokens`. Span `generate-tokens` có các GenAI semantic attributes như input tokens, output tokens và finish reason.
 
-Structured JSON log line correlated to a trace:
+Một JSON log line có thể correlate với trace:
 
 ```json
 {
@@ -75,13 +75,13 @@ Structured JSON log line correlated to a trace:
 }
 ```
 
-Tail-sampling math: the collector policy keeps all error traces, all traces slower than 2000 ms, and 1% of healthy traces. If the service produced 100 traces/sec and none were errors or slow, the collector would keep `100 * 0.01 = 1 trace/sec`. If 2 traces/sec were slow or errors, it would keep those 2 plus about 1% of the remaining 98 healthy traces: `2 + 0.98 = 2.98 traces/sec`, or about 3%.
+Tail-sampling math: policy của collector giữ toàn bộ error traces, toàn bộ traces chậm hơn 2000 ms, và 1% healthy traces. Nếu service tạo 100 traces/sec và không có trace nào error hoặc slow, collector sẽ giữ `100 * 0.01 = 1 trace/sec`. Nếu có 2 traces/sec là slow hoặc error, collector sẽ giữ 2 trace đó cộng thêm khoảng 1% của 98 healthy traces còn lại: `2 + 0.98 = 2.98 traces/sec`, xấp xỉ 3%.
 
 ---
 
 ## 4. Track 04 - Drift Detection
 
-`04-drift-detection/reports/drift-summary.json`:
+Nội dung `04-drift-detection/reports/drift-summary.json`:
 
 ```json
 {
@@ -92,24 +92,24 @@ Tail-sampling math: the collector policy keeps all error traces, all traces slow
 }
 ```
 
-For `prompt_length`, I would use PSI first because the main question is whether production prompt buckets shifted compared with the reference period. For `embedding_norm`, I would use KS because it is a continuous scalar where a distribution-shape change matters more than fixed buckets. For `response_length`, I would use KS or PSI depending on volume: KS for continuous sensitivity, PSI for operational dashboards that need stable bucketed interpretation. For `response_quality`, I would use KS for the continuous score and alert only after confirming the shift is sustained, because quality scores can be noisy.
+Với `prompt_length`, em sẽ ưu tiên PSI vì câu hỏi chính là production prompt có bị lệch theo các bucket so với reference period không. Với `embedding_norm`, em chọn KS vì đây là scalar liên tục, thay đổi hình dạng phân phối quan trọng hơn việc chia bucket cố định. Với `response_length`, em sẽ chọn KS hoặc PSI tùy volume: KS nhạy hơn với phân phối liên tục, còn PSI dễ đọc hơn trong dashboard vận hành. Với `response_quality`, em chọn KS cho score liên tục và chỉ alert khi shift kéo dài, vì quality score thường nhiễu.
 
 ---
 
 ## 5. Track 05 - Cross-Day Integration
 
-Evidence screenshot:
+Ảnh evidence:
 
 - `submission/screenshots/cross-day-dashboard.png`
 
-I connected a real prior-day source from Day20 Model Serving. Day20 runs native `llama-server.exe` on `localhost:8080`, and Day23 Prometheus scrapes it through `host.docker.internal:8080/metrics` using the `day20-llamacpp` job. The cross-day dashboard renders all 6 panels; the Day20 panel has real data from `llamacpp:predicted_tokens_seconds{job="day20-llamacpp"}`.
+Em đã kết nối một source thật từ lab ngày trước: Day20 Model Serving. Day20 chạy native `llama-server.exe` trên `localhost:8080`, còn Day23 Prometheus scrape metric qua `host.docker.internal:8080/metrics` với job `day20-llamacpp`. Cross-day dashboard render đủ 6 panel; panel Day20 có data thật từ metric `llamacpp:predicted_tokens_seconds{job="day20-llamacpp"}`.
 
-The hardest prior-day metric to expose was the Day20 llama.cpp metric because the Python fallback server does not expose the same `/metrics` endpoint. The native llama.cpp binary had to be used with `--metrics`, then Prometheus had to scrape from Docker through `host.docker.internal` rather than `localhost`.
+Metric prior-day khó expose nhất là metric của Day20 llama.cpp, vì Python fallback server không expose cùng endpoint `/metrics`. Để có metric thật, em phải dùng native llama.cpp binary với flag `--metrics`, sau đó để Prometheus trong Docker scrape qua `host.docker.internal` thay vì `localhost`.
 
 ---
 
-## 6. The Single Change That Mattered Most
+## 6. Thay Đổi Quan Trọng Nhất
 
-The single change that mattered most was making the `predict` span the current parent span while the child spans run. Before that, it was possible to emit spans but still lose the useful causal shape in Jaeger. Once `predict` became the active span, `embed-text`, `vector-search`, and `generate-tokens` appeared under one request trace, which made the system explainable instead of only instrumented.
+Thay đổi quan trọng nhất là làm cho span `predict` trở thành current parent span trong lúc các child span chạy. Trước đó hệ thống vẫn có thể emit spans, nhưng Jaeger không thể hiện rõ quan hệ nhân quả giữa các bước. Khi `predict` là active span, các span `embed-text`, `vector-search` và `generate-tokens` nằm dưới cùng một request trace, giúp hệ thống trở nên giải thích được thay vì chỉ có telemetry rời rạc.
 
-That connects directly to the deck's observability point: telemetry is useful only when it answers an operational question. A flat list of spans says "work happened"; a parent-child trace says "this request spent time in embedding, retrieval, then generation." That structure is what lets an on-call engineer decide whether the issue is model generation, vector search, or the API wrapper.
+Điều này liên hệ trực tiếp với ý chính của observability trong deck: telemetry chỉ hữu ích khi nó trả lời được câu hỏi vận hành. Một danh sách span phẳng chỉ nói rằng "có việc đã chạy"; một parent-child trace nói rõ request đã đi qua embedding, retrieval rồi generation. Cấu trúc đó giúp người on-call quyết định vấn đề nằm ở generation của model, vector search, hay API wrapper.
