@@ -9,8 +9,7 @@ venv/
 # Lab artifacts (generated)
 benchmarks/*.csv
 benchmarks/*.json
-submission/screenshots/*.png
-submission/screenshots/*.jpg
+# Submission evidence screenshots are committed for grading.
 
 # Local OS junk
 .DS_Store
