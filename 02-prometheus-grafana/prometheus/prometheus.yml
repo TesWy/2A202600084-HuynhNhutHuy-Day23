@@ -34,8 +34,8 @@ scrape_configs:
   #     - targets: ['host.docker.internal:6333']
   #   metrics_path: /metrics
 
-  # Day 20 model-serving integration (optional, see §05)
-  # - job_name: 'day20-llamacpp'
-  #   static_configs:
-  #     - targets: ['host.docker.internal:8080']
-  #   metrics_path: /metrics
+  # Day 20 model-serving integration (see §05)
+  - job_name: 'day20-llamacpp'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: /metrics

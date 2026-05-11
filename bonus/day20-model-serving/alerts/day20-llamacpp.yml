@@ -1,0 +1,19 @@
+groups:
+  - name: day20-llamacpp
+    interval: 30s
+    rules:
+      - alert: Day20LlamaCppDegraded
+        expr: |
+          up{job="day20-llamacpp"} == 0
+          or
+          llamacpp:predicted_tokens_seconds{job="day20-llamacpp"} < 20
+          or
+          llamacpp:requests_deferred{job="day20-llamacpp"} > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: day20-llamacpp
+        annotations:
+          summary: "Day20 llama.cpp serving is degraded"
+          description: "The Day20 model server is unreachable, generating below 20 tokens/sec, or deferring requests."
+          runbook_url: "bonus/day20-model-serving/RUNBOOK.md"

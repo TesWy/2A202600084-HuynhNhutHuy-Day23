@@ -1,0 +1,58 @@
+{
+  "title": "Day20 llama.cpp Serving",
+  "uid": "day20-llamacpp-serving",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Target Up",
+      "id": 1,
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "up{job=\"day20-llamacpp\"}", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short", "noValue": "No Data"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Generation Throughput",
+      "id": 2,
+      "gridPos": {"x": 6, "y": 0, "w": 9, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "llamacpp:predicted_tokens_seconds{job=\"day20-llamacpp\"}", "legendFormat": "tok/s", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "ops", "noValue": "No Data"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Prompt Throughput",
+      "id": 3,
+      "gridPos": {"x": 15, "y": 0, "w": 9, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "llamacpp:prompt_tokens_seconds{job=\"day20-llamacpp\"}", "legendFormat": "prompt tok/s", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "ops", "noValue": "No Data"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Deferred Requests",
+      "id": 4,
+      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "llamacpp:requests_deferred{job=\"day20-llamacpp\"}", "legendFormat": "deferred", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short", "noValue": "No Data"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Busy Slots Per Decode",
+      "id": 5,
+      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "llamacpp:n_busy_slots_per_decode{job=\"day20-llamacpp\"}", "legendFormat": "busy slots", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "short", "noValue": "No Data"}}
+    }
+  ]
+}
