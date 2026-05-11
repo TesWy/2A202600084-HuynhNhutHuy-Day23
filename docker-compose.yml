@@ -54,12 +54,21 @@ services:
       - "127.0.0.1:9093:9093"
     volumes:
       - ./02-prometheus-grafana/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    depends_on:
+      - alert-relay
+    networks: [obs]
+
+  alert-relay:
+    image: python:3.12-slim
+    container_name: day23-alert-relay
     environment:
-      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/REPLACE/ME}
-    entrypoint:
-      - /bin/sh
-      - -c
-      - sed "s|__SLACK_WEBHOOK_URL__|$${SLACK_WEBHOOK_URL}|g" /etc/alertmanager/alertmanager.yml > /tmp/alertmanager.yml && /bin/alertmanager --config.file=/tmp/alertmanager.yml
+      ALERT_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      PORT: 9097
+    volumes:
+      - ./scripts/alert-relay.py:/relay/alert-relay.py:ro
+    command: ["python", "-u", "/relay/alert-relay.py"]
     networks: [obs]
 
   grafana:
